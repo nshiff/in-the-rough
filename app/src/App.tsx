@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react'
-import { UploadCloud, CheckCircle2, MapPin, Briefcase, Sun, Moon, Monitor } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { UploadCloud, CheckCircle2, MapPin, Briefcase } from 'lucide-react'
+import { ThemeSelect } from './components/ThemeSelect'
 
 // Define types based on backend schema
 interface JobMatch {
@@ -16,44 +17,7 @@ function App() {
   const [isUploading, setIsUploading] = useState(false)
   const [jobs, setJobs] = useState<JobMatch[]>([])
   const [uploadSuccess, setUploadSuccess] = useState(false)
-  const [theme, setTheme] = useState<'system' | 'light' | 'dark'>(() => {
-    const saved = localStorage.getItem('theme-preference')
-    return (saved as 'system' | 'light' | 'dark') || 'system'
-  })
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    const root = document.documentElement
-    
-    const applyTheme = () => {
-      if (theme === 'system') {
-        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-        if (isDark) root.classList.add('dark')
-        else root.classList.remove('dark')
-      } else if (theme === 'dark') {
-        root.classList.add('dark')
-      } else {
-        root.classList.remove('dark')
-      }
-    }
-    
-    applyTheme()
-    
-    // Listen for system theme changes if in system mode
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    const handleChange = () => {
-      if (theme === 'system') applyTheme()
-    }
-    
-    mediaQuery.addEventListener('change', handleChange)
-    return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [theme])
-
-  const handleThemeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newTheme = e.target.value as 'system' | 'light' | 'dark'
-    setTheme(newTheme)
-    localStorage.setItem('theme-preference', newTheme)
-  }
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
@@ -116,19 +80,7 @@ function App() {
 
   return (
     <div className="container animate-fade-in">
-      <div className="theme-select-container">
-        {theme === 'system' ? <Monitor size={16} /> : theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
-        <select 
-          className="theme-select" 
-          value={theme} 
-          onChange={handleThemeChange}
-          aria-label="Select theme"
-        >
-          <option value="system">System</option>
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-        </select>
-      </div>
+      <ThemeSelect />
 
       <header className="header">
         <h1>In The <span className="text-gradient">Rough</span></h1>
