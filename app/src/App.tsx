@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react'
-import { UploadCloud, CheckCircle2, MapPin, Briefcase } from 'lucide-react'
+import { useState } from 'react'
+import { CheckCircle2, MapPin, Briefcase } from 'lucide-react'
 import { ThemeSelect } from './components/ThemeSelect'
+import { ResumeUploader } from './components/ResumeUploader'
 
 // Define types based on backend schema
 interface JobMatch {
@@ -13,35 +14,9 @@ interface JobMatch {
 }
 
 function App() {
-  const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [jobs, setJobs] = useState<JobMatch[]>([])
   const [uploadSuccess, setUploadSuccess] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
-
-  const handleDragLeave = () => {
-    setIsDragging(false)
-  }
-
-  const handleDrop = async (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-    const files = e.dataTransfer.files
-    if (files.length > 0) {
-      await processFile(files[0])
-    }
-  }
-
-  const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      await processFile(e.target.files[0])
-    }
-  }
 
   const processFile = async (file: File) => {
     // Check if it's a valid file type (pdf, docx, txt) - simplified check
@@ -92,36 +67,7 @@ function App() {
 
       <main>
         {!uploadSuccess && (
-          <div 
-            className={`uploader-box ${isDragging ? 'drag-active' : ''}`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            {isUploading ? (
-              <div className="loader">
-                <div className="spinner"></div>
-                <p>Analyzing your career trajectory...</p>
-              </div>
-            ) : (
-              <>
-                <UploadCloud className="uploader-icon" />
-                <h2>Drop your resume here</h2>
-                <p className="text-muted">Supports PDF, DOCX, and TXT files</p>
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  onChange={handleFileInput} 
-                  style={{ display: 'none' }}
-                  accept=".pdf,.docx,.txt"
-                />
-                <button className="btn" style={{ marginTop: '1.5rem' }}>
-                  Browse Files
-                </button>
-              </>
-            )}
-          </div>
+          <ResumeUploader onFileSelected={processFile} isUploading={isUploading} />
         )}
 
         {uploadSuccess && jobs.length > 0 && (
