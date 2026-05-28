@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { CheckCircle2, MapPin, Briefcase } from 'lucide-react'
+import { useMutation } from '@tanstack/react-query'
 import { ThemeSelect } from './components/ThemeSelect'
 import { ResumeUploader } from './components/ResumeUploader'
 
@@ -14,47 +15,33 @@ interface JobMatch {
 }
 
 function App() {
-  const [isUploading, setIsUploading] = useState(false)
   const [jobs, setJobs] = useState<JobMatch[]>([])
   const [uploadSuccess, setUploadSuccess] = useState(false)
 
-  const processFile = async (file: File) => {
-    // Check if it's a valid file type (pdf, docx, txt) - simplified check
-    setIsUploading(true)
-    setUploadSuccess(false)
-    setJobs([])
-    
-    try {
+  const processResumeMutation = useMutation({
+    mutationFn: async (file: File) => {
       const formData = new FormData()
       formData.append('file', file)
 
-      // 1. Upload the resume
-      const uploadRes = await fetch('http://127.0.0.1:8000/api/upload', {
+      const response = await fetch('http://127.0.0.1:8000/api/search-jobs', {
         method: 'POST',
         body: formData,
       })
-
-      if (!uploadRes.ok) throw new Error('Upload failed')
-
-      setUploadSuccess(true)
-
-      // 2. Fetch the jobs shortlist
-      const jobsRes = await fetch('http://127.0.0.1:8000/api/jobs')
-      if (!jobsRes.ok) throw new Error('Failed to fetch jobs')
+      if (!response.ok) throw new Error('Failed to search jobs')
       
-      const jobsData: JobMatch[] = await jobsRes.json()
-      setJobs(jobsData)
-
-    } catch (error) {
+      return response.json() as Promise<JobMatch[]>
+    },
+    onSuccess: (data) => {
+      setJobs(data)
+      setUploadSuccess(true)
+    },
+    onError: (error) => {
       console.error('Error processing resume:', error)
-      alert('Something went wrong. Please try again.')
-    } finally {
-      setIsUploading(false)
     }
-  }
+  })
 
   return (
-    <div className="container animate-fade-in">
+    <div className="container">
       <ThemeSelect />
 
       <header className="header">
@@ -67,11 +54,21 @@ function App() {
 
       <main>
         {!uploadSuccess && (
-          <ResumeUploader onFileSelected={processFile} isUploading={isUploading} />
+          <>
+            <ResumeUploader 
+              onFileSelected={(file) => processResumeMutation.mutate(file)} 
+              isUploading={processResumeMutation.isPending} 
+            />
+            {processResumeMutation.isError && (
+              <div className="error-message">
+                Something went wrong while processing your resume. Please try again.
+              </div>
+            )}
+          </>
         )}
 
         {uploadSuccess && jobs.length > 0 && (
-          <div className="job-list animate-fade-in">
+          <div className="job-list">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
               <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
                 <CheckCircle2 color="var(--accent)" /> Your Curated Shortlist

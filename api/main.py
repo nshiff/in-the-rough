@@ -23,14 +23,11 @@ class JobMatch(BaseModel):
     match_score: int
     reasoning: str
 
-@app.post("/api/upload")
-async def upload_resume(file: UploadFile = File(...)):
+@app.post("/api/search-jobs", response_model=List[JobMatch])
+async def search_jobs(file: UploadFile = File(...)):
     # Simulate processing delay
     time.sleep(2)
-    return {"message": f"Successfully processed {file.filename}", "status": "success"}
-
-@app.get("/api/jobs", response_model=List[JobMatch])
-async def get_jobs():
+    
     # Mock data representing the "shortlist" concept
     return [
         {
