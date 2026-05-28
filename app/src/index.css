@@ -27,6 +27,17 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+:root.dark {
+  --bg-color: #0f172a; /* Dark slate */
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --card-bg: #1e293b;
+  --border-color: #334155;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.25);
+}
+
 body {
   margin: 0;
   display: flex;
@@ -101,6 +112,37 @@ body {
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+}
+
+.theme-select-container {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-select {
+  background: transparent;
+  color: var(--text-main);
+  border: none;
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  cursor: pointer;
+  padding: 0.25rem 0;
+}
+
+.theme-select option {
+  background-color: var(--card-bg);
+  color: var(--text-main);
 }
 
 .card {
